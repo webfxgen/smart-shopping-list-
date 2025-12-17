@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Grocerie Luxe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- OCR Library -->
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js'></script>
+
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #1e293b;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, .serif {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Premium Gradient */
+        .bg-premium {
+            background: linear-gradient(135deg, #064e3b 0%, #059669 100%);
+        }
+        
+        .text-gold {
+            color: #d4af37;
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Glassmorphism */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
+        }
+
+        .category-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 4px solid transparent;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        }
+
+        /* Custom Checkbox */
+        .custom-checkbox input:checked + div {
+            background-color: #059669;
+            border-color: #059669;
+        }
+        .custom-checkbox input:checked + div svg {
+            display: block;
+        }
+        
+        /* Loader */
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #FFF;
+            border-bottom-color: #d4af37;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Animations */
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-slide-up {
+            animation: slideUp 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen relative overflow-x-hidden">
+
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+        <div class="max-w-2xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-leaf text-emerald-700 text-xl"></i>
+                <span class="text-xl font-bold tracking-tight text-emerald-900 serif">Grocerie<span class="italic text-emerald-600">Luxe</span></span>
+            </div>
+            <button onclick="resetApp()" class="text-gray-400 hover:text-emerald-600 transition">
+                <i class="fa-solid fa-rotate-right"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="pt-24 pb-32 px-4 max-w-2xl mx-auto min-h-screen flex flex-col">
+        
+        <!-- Welcome / Input Section -->
+        <div id="input-section" class="flex-1 flex flex-col justify-center transition-all duration-500">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-gray-900 mb-2 serif">Smart Shopping</h1>
+                <p class="text-gray-500 font-light">Snap a photo or type your list. We'll organize it.</p>
+            </div>
+
+            <!-- Input Card -->
+            <div class="glass-panel rounded-3xl p-6 mb-6">
+                <!-- Text Area -->
+                <div class="relative">
+                    <textarea id="raw-input" class="w-full h-40 bg-gray-50 border border-gray-200 rounded-xl p-4 text-gray-700 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none resize-none transition" placeholder="Example: 2kg Rice, Milk, Tomatoes, Soap..."></textarea>
+                    <div class="absolute bottom-3 right-3 text-xs text-gray-400">
+                        <span id="char-count">0</span> chars
+                    </div>
+                </div>
+
+                <!-- Tools Row -->
+                <div class="flex gap-4 mt-4">
+                    <!-- Camera Button -->
+                    <label for="camera-input" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl py-3 flex items-center justify-center gap-2 cursor-pointer transition border border-gray-200 group">
+                        <i class="fa-solid fa-camera group-hover:text-emerald-600 transition"></i>
+                        <span class="font-medium">Snap List</span>
+                        <input type="file" id="camera-input" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                    </label>
+                    
+                    <!-- Organize Button -->
+                    <button onclick="processList()" class="flex-[2] bg-premium text-white rounded-xl py-3 font-medium shadow-lg shadow-emerald-200 hover:shadow-emerald-300 transition flex items-center justify-center gap-2">
+                        <span>Organize</span>
+                        <i class="fa-solid fa-wand-magic-sparkles text-yellow-300"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Hint -->
+            <p class="text-center text-xs text-gray-400">
+                <i class="fa-solid fa-circle-info mr-1"></i> AI categorization is automatic
+            </p>
+        </div>
+
+        <!-- Loader Overlay -->
+        <div id="loader-overlay" class="fixed inset-0 bg-black/80 z-[60] hidden flex-col items-center justify-center backdrop-blur-sm">
+            <span class="loader mb-4"></span>
+            <p id="loader-text" class="text-white font-medium tracking-wide animate-pulse">Scanning Shopping List...</p>
+        </div>
+
+        <!-- Result Section (Hidden Initially) -->
+        <div id="result-section" class="hidden animate-slide-up">
+            <div class="flex justify-between items-end mb-6">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900 serif">Your List</h2>
+                    <p class="text-sm text-gray-500" id="item-count-badge">0 items organized</p>
+                </div>
+                <button onclick="shareList()" class="bg-gray-900 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-share-nodes"></i>
+                </button>
+            </div>
+
+            <!-- Categories Container -->
+            <div id="categories-container" class="space-y-6">
+                <!-- Categories injected by JS -->
+            </div>
+
+            <!-- Bottom Spacer -->
+            <div class="h-10"></div>
+        </div>
+
+    </main>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-3">
+        <i class="fa-solid fa-check-circle text-emerald-400"></i>
+        <span id="toast-message">Action successful</span>
+    </div>
+
+    <script>
+        // --- DATA & CONFIG ---
+        const categoryMap = {
+            'vegetables': { icon: 'fa-carrot', color: 'border-l-green-500', title: 'Fresh Produce' },
+            'fruits': { icon: 'fa-apple-whole', color: 'border-l-red-400', title: 'Fruits' },
+            'dairy': { icon: 'fa-glass-water', color: 'border-l-blue-400', title: 'Dairy & Cold' },
+            'grocery': { icon: 'fa-bowl-rice', color: 'border-l-yellow-600', title: 'Pantry & Grocery' },
+            'toiletries': { icon: 'fa-pump-soap', color: 'border-l-purple-400', title: 'Personal Care' },
+            'snacks': { icon: 'fa-cookie-bite', color: 'border-l-orange-400', title: 'Snacks & Beverages' },
+            'others': { icon: 'fa-basket-shopping', color: 'border-l-gray-400', title: 'Essentials' }
+        };
+
+        // Simple Keyword Matching Dictionary
+        const keywords = {
+            vegetables: ['tomato', 'potato', 'onion', 'ginger', 'garlic', 'chilli', 'spinach', 'cabbage', 'cauliflower', 'carrot', 'cucumber', 'lemon', 'coriander', 'mint', 'veg', 'brinjal', 'ladyfinger'],
+            fruits: ['apple', 'banana', 'mango', 'grapes', 'orange', 'papaya', 'melon', 'fruit', 'berry'],
+            dairy: ['milk', 'curd', 'yogurt', 'cheese', 'butter', 'paneer', 'cream', 'ice cream', 'ghee', 'egg', 'eggs'],
+            grocery: ['rice', 'flour', 'atta', 'dal', 'oil', 'salt', 'sugar', 'spices', 'masala', 'tea', 'coffee', 'pasta', 'maggi', 'noodle', 'bread', 'sauce', 'ketchup', 'honey'],
+            toiletries: ['soap', 'shampoo', 'paste', 'brush', 'wash', 'detergent', 'cleaner', 'tissue', 'paper', 'cream', 'lotion'],
+            snacks: ['chips', 'biscuit', 'cookie', 'coke', 'soda', 'juice', 'chocolate', 'namkeen']
+        };
+
+        // --- DOM ELEMENTS ---
+        const rawInput = document.getElementById('raw-input');
+        const charCount = document.getElementById('char-count');
+        const inputSection = document.getElementById('input-section');
+        const resultSection = document.getElementById('result-section');
+        const loaderOverlay = document.getElementById('loader-overlay');
+        const loaderText = document.getElementById('loader-text');
+        const categoriesContainer = document.getElementById('categories-container');
+        const itemCountBadge = document.getElementById('item-count-badge');
+        const toast = document.getElementById('toast');
+
+        // --- EVENT LISTENERS ---
+        rawInput.addEventListener('input', () => {
+            charCount.textContent = rawInput.value.length;
+        });
+
+        // --- FUNCTIONS ---
+
+        // 1. Image OCR Processing
+        async function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            showLoader(true, "Scanning Receipt / List...");
+
+            try {
+                const { data: { text } } = await Tesseract.recognize(
+                    file,
+                    'eng',
+                    { logger: m => console.log(m) } // Optional logger
+                );
+                
+                rawInput.value = text;
+                showToast("Text extracted successfully!");
+                processList(); // Auto process after scan
+            } catch (error) {
+                console.error(error);
+                showToast("Failed to read image. Please try again.");
+                showLoader(false);
+            }
+        }
+
+        // 2. Core Processing Logic
+        function processList() {
+            const text = rawInput.value.trim();
+            if (!text) {
+                showToast("Please enter items or snap a photo.");
+                return;
+            }
+
+            showLoader(true, "Organizing...");
+
+            // Simulated delay for "AI" feel if text entry
+            setTimeout(() => {
+                const items = text.split(/[\n,]+/).map(i => i.trim()).filter(i => i.length > 0);
+                const categorizedData = categorizeItems(items);
+                renderResults(categorizedData);
+                
+                showLoader(false);
+                switchView('result');
+            }, 800);
+        }
+
+        function categorizeItems(items) {
+            const sorted = {};
+            // Initialize arrays
+            Object.keys(categoryMap).forEach(k => sorted[k] = []);
+
+            items.forEach(item => {
+                let found = false;
+                const lowerItem = item.toLowerCase();
+
+                // Check against keywords
+                for (const [cat, wordList] of Object.entries(keywords)) {
+                    if (wordList.some(word => lowerItem.includes(word))) {
+                        sorted[cat].push(item);
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) sorted['others'].push(item);
+            });
+
+            return sorted;
+        }
+
+        // 3. Rendering
+        function renderResults(data) {
+            categoriesContainer.innerHTML = '';
+            let totalCount = 0;
+
+            Object.entries(data).forEach(([key, items]) => {
+                if (items.length === 0) return;
+
+                totalCount += items.length;
+                const meta = categoryMap[key];
+
+                const section = document.createElement('div');
+                section.className = `glass-panel rounded-2xl p-5 category-card ${meta.color}`;
+                
+                let listHtml = '';
+                items.forEach((item, index) => {
+                    const uniqueId = `${key}-${index}`;
+                    listHtml += `
+                        <label class="custom-checkbox flex items-center gap-3 cursor-pointer py-2 border-b border-gray-100 last:border-0 hover:bg-gray-50/50 rounded transition px-2">
+                            <input type="checkbox" class="hidden peer">
+                            <div class="w-5 h-5 border-2 border-gray-300 rounded flex items-center justify-center peer-checked:border-emerald-600 peer-checked:bg-emerald-600 transition-colors">
+                                <svg class="w-3 h-3 text-white hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                            <span class="text-gray-700 peer-checked:text-gray-400 peer-checked:line-through transition-colors">${item}</span>
+                        </label>
+                    `;
+                });
+
+                section.innerHTML = `
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+                            <i class="fa-solid ${meta.icon}"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800 serif">${meta.title}</h3>
+                        <span class="ml-auto text-xs font-bold bg-gray-100 px-2 py-1 rounded text-gray-500">${items.length}</span>
+                    </div>
+                    <div class="flex flex-col">
+                        ${listHtml}
+                    </div>
+                `;
+
+                categoriesContainer.appendChild(section);
+            });
+
+            itemCountBadge.textContent = `${totalCount} items organized successfully`;
+        }
+
+        // 4. Sharing
+        function shareList() {
+            let shareText = "🛒 *My Shopping List* (via Grocerie Luxe)\n\n";
+            const sections = categoriesContainer.querySelectorAll('.category-card');
+            
+            sections.forEach(sec => {
+                const title = sec.querySelector('h3').textContent;
+                shareText += `*${title}*\n`;
+                const items = sec.querySelectorAll('label span');
+                items.forEach(span => {
+                    shareText += `▫️ ${span.textContent}\n`;
+                });
+                shareText += "\n";
+            });
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Grocerie Luxe List',
+                    text: shareText
+                }).catch(console.error);
+            } else {
+                navigator.clipboard.writeText(shareText);
+                showToast("List copied to clipboard!");
+            }
+        }
+
+        // Utilities
+        function switchView(view) {
+            if (view === 'result') {
+                inputSection.classList.add('hidden');
+                resultSection.classList.remove('hidden');
+            } else {
+                inputSection.classList.remove('hidden');
+                resultSection.classList.add('hidden');
+            }
+        }
+
+        function resetApp() {
+            rawInput.value = '';
+            charCount.textContent = '0';
+            switchView('input');
+        }
+
+        function showLoader(show, text) {
+            if (show) {
+                loaderOverlay.classList.remove('hidden');
+                loaderOverlay.classList.add('flex');
+                loaderText.textContent = text;
+            } else {
+                loaderOverlay.classList.add('hidden');
+                loaderOverlay.classList.remove('flex');
+            }
+        }
+
+        function showToast(msg) {
+            document.getElementById('toast-message').textContent = msg;
+            toast.classList.remove('opacity-0');
+            toast.style.transform = "translate(-50%, -10px)";
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                toast.style.transform = "translate(-50%, 0)";
+            }, 3000);
+        }
+
+    </script>
+</body>
+</html>
