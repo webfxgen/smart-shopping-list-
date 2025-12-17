@@ -6,215 +6,303 @@
     <title>Grocerie Luxe</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- OCR Library -->
     <script src='https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js'></script>
 
     <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #047857;
+            --accent: #f59e0b;
+            --bg-color: #f8fafc;
+        }
+
         body {
-            background-color: #f8fafc;
+            background-color: var(--bg-color);
             font-family: 'Plus Jakarta Sans', sans-serif;
             color: #1e293b;
             -webkit-font-smoothing: antialiased;
+            /* Subtle Mesh Gradient Background */
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(156, 75%, 90%, 0.6) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(39, 90%, 90%, 0.6) 0, transparent 50%);
+            background-attachment: fixed;
         }
 
         h1, h2, h3, .serif {
             font-family: 'Playfair Display', serif;
         }
 
-        /* Premium Gradient */
-        .bg-premium {
-            background: linear-gradient(135deg, #064e3b 0%, #059669 100%);
-        }
-        
-        .text-gold {
-            color: #d4af37;
-            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        /* Glassmorphism */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
-        }
-
-        .category-card {
+        /* Gradient Button */
+        .btn-gradient {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border-left: 4px solid transparent;
+            position: relative;
+            overflow: hidden;
         }
-        
-        .category-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        .btn-gradient::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(255,255,255,0.2), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .btn-gradient:hover::after {
+            opacity: 1;
+        }
+        .btn-gradient:active {
+            transform: scale(0.98);
         }
 
-        /* Custom Checkbox */
+        /* Modern Input */
+        .input-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.05), 
+                0 10px 15px -3px rgba(0, 0, 0, 0.05),
+                inset 0 0 0 1px rgba(255,255,255,0.5);
+            border-radius: 24px;
+        }
+
+        textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            resize: none;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #334155;
+        }
+        textarea::placeholder {
+            color: #94a3b8;
+            font-weight: 300;
+        }
+
+        /* Category Card Styles */
+        .category-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+        .category-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px -10px rgba(0,0,0,0.08);
+        }
+
+        /* Checkbox Animation */
         .custom-checkbox input:checked + div {
-            background-color: #059669;
-            border-color: #059669;
+            transform: scale(1);
+            background-color: var(--primary);
+            border-color: var(--primary);
         }
-        .custom-checkbox input:checked + div svg {
-            display: block;
+        .custom-checkbox div {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
+        /* Animations */
+        .animate-enter {
+            animation: enter 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            opacity: 0;
+            transform: translateY(15px);
+        }
+        @keyframes enter {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         /* Loader */
         .loader {
-            width: 48px;
-            height: 48px;
-            border: 5px solid #FFF;
-            border-bottom-color: #d4af37;
+            width: 48px; height: 48px;
+            border: 4px solid #fff;
+            border-bottom-color: var(--primary);
             border-radius: 50%;
             display: inline-block;
             box-sizing: border-box;
             animation: rotation 1s linear infinite;
         }
-
-        @keyframes rotation {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Animations */
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        .animate-slide-up {
-            animation: slideUp 0.5s ease-out forwards;
-        }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen relative overflow-x-hidden">
+<body class="min-h-screen relative overflow-x-hidden selection:bg-emerald-100 selection:text-emerald-900">
 
-    <!-- Navbar -->
-    <nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
-        <div class="max-w-2xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-leaf text-emerald-700 text-xl"></i>
-                <span class="text-xl font-bold tracking-tight text-emerald-900 serif">Grocerie<span class="italic text-emerald-600">Luxe</span></span>
+    <!-- Header -->
+    <header class="fixed top-0 w-full z-40 bg-white/80 backdrop-blur-lg border-b border-slate-100/50">
+        <div class="max-w-md mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-200">
+                    <i class="fa-solid fa-lemon text-sm"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black tracking-tight text-slate-800 leading-none">Grocerie<span class="text-emerald-600">Luxe</span></h1>
+                    <span class="text-[0.65rem] font-bold text-slate-400 tracking-widest uppercase">Smart Organizer</span>
+                </div>
             </div>
-            <button onclick="resetApp()" class="text-gray-400 hover:text-emerald-600 transition">
-                <i class="fa-solid fa-rotate-right"></i>
+            <button onclick="resetApp()" class="w-9 h-9 rounded-full hover:bg-slate-100 text-slate-400 hover:text-emerald-600 transition flex items-center justify-center">
+                <i class="fa-solid fa-arrows-rotate"></i>
             </button>
         </div>
-    </nav>
+    </header>
 
-    <!-- Main Content Area -->
-    <main class="pt-24 pb-32 px-4 max-w-2xl mx-auto min-h-screen flex flex-col">
+    <!-- Main Content -->
+    <main class="pt-28 pb-32 px-5 max-w-md mx-auto min-h-screen flex flex-col">
         
-        <!-- Welcome / Input Section -->
-        <div id="input-section" class="flex-1 flex flex-col justify-center transition-all duration-500">
-            <div class="text-center mb-8">
-                <h1 class="text-4xl font-bold text-gray-900 mb-2 serif">Smart Shopping</h1>
-                <p class="text-gray-500 font-light">Snap a photo or type your list. We'll organize it.</p>
+        <!-- INPUT VIEW -->
+        <div id="input-section" class="flex-1 flex flex-col transition-all duration-500">
+            <div class="mb-6 animate-enter" style="animation-delay: 0.05s;">
+                <h2 class="text-4xl font-bold text-slate-800 mb-2 serif">Plan your <br><span class="text-emerald-600">Weekly Haul</span></h2>
+                <p class="text-slate-500 text-lg">Paste your messy list below or snap a photo of your fridge note.</p>
             </div>
 
-            <!-- Input Card -->
-            <div class="glass-panel rounded-3xl p-6 mb-6">
-                <!-- Text Area -->
-                <div class="relative">
-                    <textarea id="raw-input" class="w-full h-40 bg-gray-50 border border-gray-200 rounded-xl p-4 text-gray-700 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none resize-none transition" placeholder="Example: 2kg Rice, Milk, Tomatoes, Soap..."></textarea>
-                    <div class="absolute bottom-3 right-3 text-xs text-gray-400">
-                        <span id="char-count">0</span> chars
+            <!-- Enhanced Input Card -->
+            <div class="input-card p-1 mb-6 animate-enter" style="animation-delay: 0.1s;">
+                <div class="relative bg-white/50 rounded-t-[20px]">
+                    <textarea id="raw-input" 
+                        class="h-56 p-5" 
+                        placeholder="e.g.&#10;2kg Tomatoes&#10;Milk & Eggs&#10;Bread, Butter&#10;Shampoo..."></textarea>
+                    
+                    <!-- Character Count Badge -->
+                    <div class="absolute bottom-4 right-4 bg-white/80 backdrop-blur px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 border border-slate-100">
+                        <span id="char-count">0</span>
                     </div>
                 </div>
-
-                <!-- Tools Row -->
-                <div class="flex gap-4 mt-4">
-                    <!-- Camera Button -->
-                    <label for="camera-input" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl py-3 flex items-center justify-center gap-2 cursor-pointer transition border border-gray-200 group">
-                        <i class="fa-solid fa-camera group-hover:text-emerald-600 transition"></i>
-                        <span class="font-medium">Snap List</span>
+                
+                <!-- Toolbar -->
+                <div class="p-3 bg-white rounded-b-[20px] border-t border-slate-100/50 flex gap-3">
+                    <label class="flex-none w-14 h-14 rounded-xl bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-emerald-600 flex flex-col items-center justify-center gap-1 cursor-pointer transition border border-slate-100">
+                        <i class="fa-solid fa-camera text-lg"></i>
+                        <span class="text-[0.6rem] font-bold uppercase">Scan</span>
                         <input type="file" id="camera-input" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
                     </label>
-                    
-                    <!-- Organize Button -->
-                    <button onclick="processList()" class="flex-[2] bg-premium text-white rounded-xl py-3 font-medium shadow-lg shadow-emerald-200 hover:shadow-emerald-300 transition flex items-center justify-center gap-2">
-                        <span>Organize</span>
-                        <i class="fa-solid fa-wand-magic-sparkles text-yellow-300"></i>
+
+                    <button onclick="processList()" class="flex-1 btn-gradient text-white rounded-xl font-bold shadow-lg shadow-emerald-200/50 flex items-center justify-between px-6 group">
+                        <span class="text-lg">Organize Now</span>
+                        <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center group-hover:translate-x-1 transition">
+                            <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+                        </div>
                     </button>
                 </div>
             </div>
 
-            <!-- Hint -->
-            <p class="text-center text-xs text-gray-400">
-                <i class="fa-solid fa-circle-info mr-1"></i> AI categorization is automatic
-            </p>
-        </div>
-
-        <!-- Loader Overlay -->
-        <div id="loader-overlay" class="fixed inset-0 bg-black/80 z-[60] hidden flex-col items-center justify-center backdrop-blur-sm">
-            <span class="loader mb-4"></span>
-            <p id="loader-text" class="text-white font-medium tracking-wide animate-pulse">Scanning Shopping List...</p>
-        </div>
-
-        <!-- Result Section (Hidden Initially) -->
-        <div id="result-section" class="hidden animate-slide-up">
-            <div class="flex justify-between items-end mb-6">
-                <div>
-                    <h2 class="text-3xl font-bold text-gray-900 serif">Your List</h2>
-                    <p class="text-sm text-gray-500" id="item-count-badge">0 items organized</p>
+            <!-- Features -->
+            <div class="grid grid-cols-2 gap-4 animate-enter" style="animation-delay: 0.2s;">
+                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center"><i class="fa-solid fa-bolt"></i></div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-bold uppercase">Speed</p>
+                        <p class="text-sm font-bold text-slate-700">Instant AI Sort</p>
+                    </div>
                 </div>
-                <button onclick="shareList()" class="bg-gray-900 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:bg-gray-800 transition">
-                    <i class="fa-solid fa-share-nodes"></i>
-                </button>
+                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center"><i class="fa-solid fa-share-nodes"></i></div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-bold uppercase">Export</p>
+                        <p class="text-sm font-bold text-slate-700">Share Easily</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOADER -->
+        <div id="loader-overlay" class="fixed inset-0 bg-slate-900/20 backdrop-blur-md z-[60] hidden flex-col items-center justify-center transition-all duration-500 opacity-0">
+            <div class="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center transform scale-95 transition-transform duration-300" id="loader-card">
+                <div class="relative">
+                    <div class="w-16 h-16 border-4 border-slate-100 rounded-full"></div>
+                    <div class="absolute top-0 left-0 w-16 h-16 border-4 border-emerald-500 rounded-full border-t-transparent animate-spin"></div>
+                    <i class="fa-solid fa-basket-shopping absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-emerald-500"></i>
+                </div>
+                <p id="loader-text" class="text-slate-800 font-bold mt-6 text-lg">Sorting Items...</p>
+                <p class="text-slate-400 text-sm mt-1">Applying smart categories</p>
+            </div>
+        </div>
+
+        <!-- RESULTS VIEW -->
+        <div id="result-section" class="hidden">
+            <div class="flex justify-between items-end mb-6 animate-enter">
+                <div>
+                    <span class="text-xs font-bold tracking-widest text-emerald-600 uppercase mb-1">Your Shopping List</span>
+                    <h2 class="text-3xl font-black text-slate-900 serif">Sorted & Ready</h2>
+                </div>
+                
+                <div class="flex gap-2">
+                    <button onclick="resetApp()" class="w-11 h-11 rounded-full bg-white text-slate-400 border border-slate-100 hover:border-emerald-200 hover:text-emerald-600 shadow-sm flex items-center justify-center transition">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button onclick="shareList()" class="w-11 h-11 rounded-full bg-slate-900 text-white hover:bg-slate-800 shadow-lg shadow-slate-200 flex items-center justify-center transition active:scale-95">
+                        <i class="fa-solid fa-share"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Summary -->
+            <div class="bg-slate-900 rounded-2xl p-4 mb-8 flex justify-between items-center shadow-xl shadow-slate-200 animate-enter text-white" style="animation-delay: 0.1s;">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                        <i class="fa-solid fa-layer-group text-emerald-400"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-bold uppercase">Total Items</p>
+                        <p class="text-lg font-bold" id="item-count-badge">0 items found</p>
+                    </div>
+                </div>
+                <div class="h-8 w-[1px] bg-white/10"></div>
+                <div class="text-right pr-2">
+                    <p class="text-xs text-slate-400 font-bold uppercase">Categories</p>
+                    <p class="text-lg font-bold" id="cat-count-badge">0</p>
+                </div>
             </div>
 
             <!-- Categories Container -->
-            <div id="categories-container" class="space-y-6">
-                <!-- Categories injected by JS -->
+            <div id="categories-container" class="space-y-5 pb-20">
+                <!-- Injected via JS -->
             </div>
-
-            <!-- Bottom Spacer -->
-            <div class="h-10"></div>
         </div>
 
     </main>
 
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-3">
-        <i class="fa-solid fa-check-circle text-emerald-400"></i>
-        <span id="toast-message">Action successful</span>
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 bg-slate-800/90 backdrop-blur text-white px-6 py-3.5 rounded-full shadow-2xl opacity-0 transition-all duration-300 pointer-events-none z-50 flex items-center gap-3 transform translate-y-[-20px] min-w-[200px] justify-center">
+        <i class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toast-message" class="text-sm font-semibold tracking-wide">Done</span>
     </div>
 
     <script>
-        // --- DATA & CONFIG ---
+        // --- CONFIGURATION ---
+        // Added 'bg' property for the full card background color
         const categoryMap = {
-            'vegetables': { icon: 'fa-carrot', color: 'border-l-green-500', title: 'Fresh Produce' },
-            'fruits': { icon: 'fa-apple-whole', color: 'border-l-red-400', title: 'Fruits' },
-            'dairy': { icon: 'fa-glass-water', color: 'border-l-blue-400', title: 'Dairy & Cold' },
-            'grocery': { icon: 'fa-bowl-rice', color: 'border-l-yellow-600', title: 'Pantry & Grocery' },
-            'toiletries': { icon: 'fa-pump-soap', color: 'border-l-purple-400', title: 'Personal Care' },
-            'snacks': { icon: 'fa-cookie-bite', color: 'border-l-orange-400', title: 'Snacks & Beverages' },
-            'others': { icon: 'fa-basket-shopping', color: 'border-l-gray-400', title: 'Essentials' }
+            'vegetables': { icon: 'fa-carrot', color: 'text-green-700', bg: 'bg-green-50/80 border-green-100', title: 'Fresh Produce' },
+            'fruits': { icon: 'fa-apple-whole', color: 'text-red-600', bg: 'bg-red-50/80 border-red-100', title: 'Fruits' },
+            'dairy': { icon: 'fa-cheese', color: 'text-amber-600', bg: 'bg-amber-50/80 border-amber-100', title: 'Dairy & Eggs' },
+            'grocery': { icon: 'fa-jar', color: 'text-stone-700', bg: 'bg-stone-50/80 border-stone-200', title: 'Pantry' },
+            'toiletries': { icon: 'fa-pump-soap', color: 'text-purple-600', bg: 'bg-purple-50/80 border-purple-100', title: 'Personal Care' },
+            'snacks': { icon: 'fa-cookie-bite', color: 'text-pink-600', bg: 'bg-pink-50/80 border-pink-100', title: 'Snacks & Drinks' },
+            'others': { icon: 'fa-bag-shopping', color: 'text-blue-600', bg: 'bg-blue-50/80 border-blue-100', title: 'Essentials' }
         };
 
-        // Simple Keyword Matching Dictionary
         const keywords = {
-            vegetables: ['tomato', 'potato', 'onion', 'ginger', 'garlic', 'chilli', 'spinach', 'cabbage', 'cauliflower', 'carrot', 'cucumber', 'lemon', 'coriander', 'mint', 'veg', 'brinjal', 'ladyfinger'],
-            fruits: ['apple', 'banana', 'mango', 'grapes', 'orange', 'papaya', 'melon', 'fruit', 'berry'],
-            dairy: ['milk', 'curd', 'yogurt', 'cheese', 'butter', 'paneer', 'cream', 'ice cream', 'ghee', 'egg', 'eggs'],
-            grocery: ['rice', 'flour', 'atta', 'dal', 'oil', 'salt', 'sugar', 'spices', 'masala', 'tea', 'coffee', 'pasta', 'maggi', 'noodle', 'bread', 'sauce', 'ketchup', 'honey'],
-            toiletries: ['soap', 'shampoo', 'paste', 'brush', 'wash', 'detergent', 'cleaner', 'tissue', 'paper', 'cream', 'lotion'],
-            snacks: ['chips', 'biscuit', 'cookie', 'coke', 'soda', 'juice', 'chocolate', 'namkeen']
+            vegetables: ['tomato', 'potato', 'onion', 'ginger', 'garlic', 'chilli', 'spinach', 'cabbage', 'cauliflower', 'carrot', 'cucumber', 'lemon', 'coriander', 'mint', 'veg', 'brinjal', 'ladyfinger', 'pepper', 'mushroom', 'broccoli', 'lettuce', 'beans'],
+            fruits: ['apple', 'banana', 'mango', 'grapes', 'orange', 'papaya', 'melon', 'fruit', 'berry', 'lime', 'avocado', 'pear', 'peach'],
+            dairy: ['milk', 'curd', 'yogurt', 'cheese', 'butter', 'paneer', 'cream', 'ice cream', 'ghee', 'egg', 'eggs', 'margarine'],
+            grocery: ['rice', 'flour', 'atta', 'dal', 'oil', 'salt', 'sugar', 'spices', 'masala', 'tea', 'coffee', 'pasta', 'maggi', 'noodle', 'bread', 'sauce', 'ketchup', 'honey', 'cereal', 'oats', 'jam'],
+            toiletries: ['soap', 'shampoo', 'paste', 'brush', 'wash', 'detergent', 'cleaner', 'tissue', 'paper', 'cream', 'lotion', 'razor', 'deodorant'],
+            snacks: ['chips', 'biscuit', 'cookie', 'coke', 'soda', 'juice', 'chocolate', 'namkeen', 'popcorn', 'candy', 'sweets']
         };
 
-        // --- DOM ELEMENTS ---
+        // --- ELEMENTS ---
         const rawInput = document.getElementById('raw-input');
         const charCount = document.getElementById('char-count');
         const inputSection = document.getElementById('input-section');
         const resultSection = document.getElementById('result-section');
         const loaderOverlay = document.getElementById('loader-overlay');
         const loaderText = document.getElementById('loader-text');
+        const loaderCard = document.getElementById('loader-card');
         const categoriesContainer = document.getElementById('categories-container');
         const itemCountBadge = document.getElementById('item-count-badge');
+        const catCountBadge = document.getElementById('cat-count-badge');
         const toast = document.getElementById('toast');
 
         // --- EVENT LISTENERS ---
@@ -224,41 +312,33 @@
 
         // --- FUNCTIONS ---
 
-        // 1. Image OCR Processing
         async function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            showLoader(true, "Scanning Receipt / List...");
+            showLoader(true, "Scanning Image...");
 
             try {
-                const { data: { text } } = await Tesseract.recognize(
-                    file,
-                    'eng',
-                    { logger: m => console.log(m) } // Optional logger
-                );
-                
+                const { data: { text } } = await Tesseract.recognize(file, 'eng');
                 rawInput.value = text;
-                showToast("Text extracted successfully!");
-                processList(); // Auto process after scan
+                showToast("Text extracted!");
+                processList();
             } catch (error) {
                 console.error(error);
-                showToast("Failed to read image. Please try again.");
+                showToast("Scan failed", true);
                 showLoader(false);
             }
         }
 
-        // 2. Core Processing Logic
         function processList() {
             const text = rawInput.value.trim();
             if (!text) {
-                showToast("Please enter items or snap a photo.");
+                showToast("List is empty!", true);
                 return;
             }
 
-            showLoader(true, "Organizing...");
+            showLoader(true, "Organizing List...");
 
-            // Simulated delay for "AI" feel if text entry
             setTimeout(() => {
                 const items = text.split(/[\n,]+/).map(i => i.trim()).filter(i => i.length > 0);
                 const categorizedData = categorizeItems(items);
@@ -266,19 +346,16 @@
                 
                 showLoader(false);
                 switchView('result');
-            }, 800);
+            }, 1000);
         }
 
         function categorizeItems(items) {
             const sorted = {};
-            // Initialize arrays
             Object.keys(categoryMap).forEach(k => sorted[k] = []);
 
             items.forEach(item => {
                 let found = false;
                 const lowerItem = item.toLowerCase();
-
-                // Check against keywords
                 for (const [cat, wordList] of Object.entries(keywords)) {
                     if (wordList.some(word => lowerItem.includes(word))) {
                         sorted[cat].push(item);
@@ -286,48 +363,53 @@
                         break;
                     }
                 }
-
                 if (!found) sorted['others'].push(item);
             });
 
             return sorted;
         }
 
-        // 3. Rendering
         function renderResults(data) {
             categoriesContainer.innerHTML = '';
             let totalCount = 0;
+            let catCount = 0;
+            let delay = 0.2;
 
             Object.entries(data).forEach(([key, items]) => {
                 if (items.length === 0) return;
 
                 totalCount += items.length;
+                catCount++;
                 const meta = categoryMap[key];
 
                 const section = document.createElement('div');
-                section.className = `glass-panel rounded-2xl p-5 category-card ${meta.color}`;
+                // Use the specific background color defined in categoryMap
+                section.className = `rounded-2xl p-5 shadow-sm border ${meta.bg} category-card animate-enter`;
+                section.style.animationDelay = `${delay}s`;
+                delay += 0.08;
                 
                 let listHtml = '';
                 items.forEach((item, index) => {
-                    const uniqueId = `${key}-${index}`;
                     listHtml += `
-                        <label class="custom-checkbox flex items-center gap-3 cursor-pointer py-2 border-b border-gray-100 last:border-0 hover:bg-gray-50/50 rounded transition px-2">
+                        <label class="custom-checkbox flex items-start gap-3 cursor-pointer py-2.5 border-b border-black/5 last:border-0 group">
                             <input type="checkbox" class="hidden peer">
-                            <div class="w-5 h-5 border-2 border-gray-300 rounded flex items-center justify-center peer-checked:border-emerald-600 peer-checked:bg-emerald-600 transition-colors">
-                                <svg class="w-3 h-3 text-white hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            <div class="mt-0.5 w-5 h-5 rounded-md bg-white border-2 border-slate-300 flex items-center justify-center peer-checked:border-emerald-500 peer-checked:bg-emerald-500 transition-all shadow-sm">
+                                <svg class="w-3 h-3 text-white hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7"></path></svg>
                             </div>
-                            <span class="text-gray-700 peer-checked:text-gray-400 peer-checked:line-through transition-colors">${item}</span>
+                            <span class="text-slate-700 font-semibold peer-checked:text-slate-400 peer-checked:line-through transition-colors text-[0.95rem]">${item}</span>
                         </label>
                     `;
                 });
 
                 section.innerHTML = `
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-lg shadow-sm ${meta.color}">
                             <i class="fa-solid ${meta.icon}"></i>
                         </div>
-                        <h3 class="text-lg font-bold text-gray-800 serif">${meta.title}</h3>
-                        <span class="ml-auto text-xs font-bold bg-gray-100 px-2 py-1 rounded text-gray-500">${items.length}</span>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800 serif leading-none">${meta.title}</h3>
+                            <p class="text-xs text-slate-500 font-medium mt-1">${items.length} items</p>
+                        </div>
                     </div>
                     <div class="flex flex-col">
                         ${listHtml}
@@ -337,12 +419,12 @@
                 categoriesContainer.appendChild(section);
             });
 
-            itemCountBadge.textContent = `${totalCount} items organized successfully`;
+            itemCountBadge.textContent = `${totalCount} items`;
+            catCountBadge.textContent = catCount;
         }
 
-        // 4. Sharing
         function shareList() {
-            let shareText = "🛒 *My Shopping List* (via Grocerie Luxe)\n\n";
+            let shareText = "🛒 *Grocerie Luxe List*\n\n";
             const sections = categoriesContainer.querySelectorAll('.category-card');
             
             sections.forEach(sec => {
@@ -350,7 +432,7 @@
                 shareText += `*${title}*\n`;
                 const items = sec.querySelectorAll('label span');
                 items.forEach(span => {
-                    shareText += `▫️ ${span.textContent}\n`;
+                    shareText += `○ ${span.textContent}\n`;
                 });
                 shareText += "\n";
             });
@@ -362,45 +444,68 @@
                 }).catch(console.error);
             } else {
                 navigator.clipboard.writeText(shareText);
-                showToast("List copied to clipboard!");
+                showToast("Copied to clipboard!");
             }
         }
 
-        // Utilities
         function switchView(view) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             if (view === 'result') {
-                inputSection.classList.add('hidden');
-                resultSection.classList.remove('hidden');
+                inputSection.classList.add('opacity-0', 'pointer-events-none', 'absolute');
+                setTimeout(() => {
+                    inputSection.classList.add('hidden');
+                    resultSection.classList.remove('hidden');
+                }, 300);
             } else {
-                inputSection.classList.remove('hidden');
                 resultSection.classList.add('hidden');
+                inputSection.classList.remove('hidden', 'opacity-0', 'pointer-events-none', 'absolute');
             }
         }
 
         function resetApp() {
             rawInput.value = '';
             charCount.textContent = '0';
+            categoriesContainer.innerHTML = '';
             switchView('input');
         }
 
         function showLoader(show, text) {
             if (show) {
                 loaderOverlay.classList.remove('hidden');
-                loaderOverlay.classList.add('flex');
+                setTimeout(() => {
+                    loaderOverlay.classList.remove('opacity-0');
+                    loaderCard.classList.remove('scale-95');
+                    loaderCard.classList.add('scale-100');
+                }, 10);
                 loaderText.textContent = text;
             } else {
-                loaderOverlay.classList.add('hidden');
-                loaderOverlay.classList.remove('flex');
+                loaderOverlay.classList.add('opacity-0');
+                loaderCard.classList.remove('scale-100');
+                loaderCard.classList.add('scale-95');
+                setTimeout(() => {
+                    loaderOverlay.classList.add('hidden');
+                }, 300);
             }
         }
 
-        function showToast(msg) {
-            document.getElementById('toast-message').textContent = msg;
-            toast.classList.remove('opacity-0');
-            toast.style.transform = "translate(-50%, -10px)";
+        function showToast(msg, isError = false) {
+            const el = document.getElementById('toast-message');
+            const icon = toast.querySelector('i');
+            
+            el.textContent = msg;
+            
+            if(isError) {
+                icon.className = 'fa-solid fa-circle-exclamation text-red-400';
+            } else {
+                icon.className = 'fa-solid fa-circle-check text-emerald-400';
+            }
+
+            toast.classList.remove('opacity-0', 'translate-y-[-20px]');
+            toast.classList.add('translate-y-0');
+            
             setTimeout(() => {
-                toast.classList.add('opacity-0');
-                toast.style.transform = "translate(-50%, 0)";
+                toast.classList.add('opacity-0', 'translate-y-[-20px]');
+                toast.classList.remove('translate-y-0');
             }, 3000);
         }
 
